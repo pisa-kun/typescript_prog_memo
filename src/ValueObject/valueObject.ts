@@ -1,6 +1,7 @@
 // AbstractObject.ts
 // https://riotz.works/articles/lopburny/2019/08/28/using-typescript-re-export-and-import-syntax-to-improve-module-arrangement/
 import {AbstractValueObject} from './AbstractValueObject';
+import { PrimitiveValueObject } from './PrimitiveValueObject';
 interface ValueObjectProps{
     [index: string]: any;
 }
@@ -38,3 +39,58 @@ const asashi_ULN = User.create({id: 1, lastName: 'Serizawa', firstName: 'asashi'
 
 console.log(asashi.equals(asashi_id2));
 console.log(asashi.equals(asashi_ULN));
+
+class UserId extends PrimitiveValueObject<number>{
+    static create(value: number): UserId{
+        if(!(value > 0)){
+            throw new Error('id は 1以上を指定しよう');
+        }
+        return new UserId(value);
+    }
+}
+
+class UserName extends PrimitiveValueObject<string>{
+    static create(value: string): UserName{
+        if(!(value.length > 0)){
+            throw new Error('id は 1以上を指定しよう');
+        }
+        return new UserName(value);
+    }
+}
+
+interface UserPropsP{
+    id: UserId;
+    name: UserName;
+}
+
+interface UserArgs{
+    id: number;
+    name: string;
+}
+
+// class UserP extends ValueObject<UserPropsP>{
+//     static create(props: UserPropsP): UserP{
+//         return new UserP(props);
+//     }
+
+//     get name(): string{
+//         return this._value.name.value;
+//     }
+// }
+
+class UserP extends ValueObject<UserPropsP>{
+    static create(props: UserArgs): UserP{
+        return new UserP({
+            id: UserId.create(props.id),
+            name: UserName.create(props.name),
+        });
+    }
+
+    get name(): string{
+        return this._value.name.value;
+    }
+}
+
+const asashiP = UserP.create({id:2, name: "serizawa asashi"});
+console.log(asashiP);
+console.log(asashiP.name);
